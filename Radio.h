@@ -2,10 +2,15 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////
 void DebugMode_Msg(String text);
+void DebugMode_Msg(String text, int valoare);
+void DebugMode_Msg(String text, bool valoare);
 void DebugMode_Msg(String text, char* valoare);
+void DebugMode_Msg(String text, String valoare);
 void Radio_Setup();
 void Radio_Receiver();
 void Radio_Parsing(char Value[], int Len);
+
+void Radio_Decode_Variable(String Variabila, bool Value);
 
 //////////////////////////////////////////////////////////////////////
 void Radio_Setup(){
@@ -13,7 +18,7 @@ void Radio_Setup(){
   vw_set_rx_pin(PIN_rx);
   vw_setup(Radio_Speed);
   vw_rx_start();
-  DebugMode_Msg("Radio > Activ.");
+  DebugMode_Msg("Radio_Setup() ...");
 }
 
 void Radio_Receiver(){
@@ -29,12 +34,12 @@ void Radio_Receiver(){
 }
 
 void Radio_Parsing(char Value[], int Len){
-  String Variabila;
   char vType[11];
   for (int i = 0; i < 11; i++){
     vType[i] = Value[i];
   }
-  Variabila = (String)vType;
+  String Variabila = (String)vType;
+  Variabila = Variabila.substring(0,11);
   int iStart = 0, iStop = 0;
   for (int i = 11; i < Len; i++){
     if (Value[i] == '{' && iStart == 0) iStart = i;
@@ -48,18 +53,19 @@ void Radio_Parsing(char Value[], int Len){
     j++;
   }
   String Valoare = (String) vValue;
-
+ 
+  //Serial.print(Variabila);
+  //Serial.print(" = ");
+  //Serial.print(Valoare);
+  //Serial.print(", ");
   
-  Serial.println(Variabila);
-  Serial.println(Valoare);
-
   if (Valoare == "True"){
-    Serial.println("Este true");
-   Status_Buzzer = true;
+    //Serial.println("Este true");
+    Radio_Decode_Variable(Variabila, true);
 
   }else if (Valoare == "False"){
-    Serial.println("Este false");
-    Status_Buzzer = false;
+    //Serial.println("Este false");
+    Radio_Decode_Variable(Variabila, false);
 
   }else{
     Serial.println("Trebuie sa fie INT");
@@ -67,9 +73,8 @@ void Radio_Parsing(char Value[], int Len){
     int iValoare = atoi(Valoare.c_str());
     Serial.println(iValoare);
 
-    iValoare = map(iValoare, 0, 1023, 0, 180);
-    Motor_Directie.write(iValoare);
-
+    Serial.println("END HH");
   }
   
 }
+
