@@ -66,4 +66,12 @@ bool oMotor_Bottom = false;
 //
 
 
+// PIN Buzzer
+int PIN_Buzzer = 38;
+
+bool Buzzer_Status = false;
+
+int Buzzer_Timer = 0;
+
+
 

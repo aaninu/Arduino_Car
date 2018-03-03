@@ -25,6 +25,9 @@ void Control_LED_Avarii();
 void Motor_Setup();
 void Control_Motor_Top();
 void Control_Motor_Bottom();
+
+void Buzzer_Setup();
+void Control_Buzzer();
 //////////////////////////////////////////////////////////////////////
 void DebugMode_Setup(){
   if (DebugMode){
@@ -164,17 +167,17 @@ void System_LED_LeftRight(){
   }else if (LED_Left == true){
     if (LED_Semnal_Timer == 0){
       digitalWrite(PIN_LED_Stanga, true);
-    }else if (LED_Semnal_Timer == 500){
+    }else if (LED_Semnal_Timer == 300){
       digitalWrite(PIN_LED_Stanga, false); 
-    }else if (LED_Semnal_Timer == 1000)
+    }else if (LED_Semnal_Timer == 600)
       LED_Semnal_Timer = -1;
     LED_Semnal_Timer += 1;
   }else if (LED_Right == true){
     if (LED_Semnal_Timer == 0){
       digitalWrite(PIN_LED_Dreapta, true);  
-    }else if (LED_Semnal_Timer == 500){
+    }else if (LED_Semnal_Timer == 300){
       digitalWrite(PIN_LED_Dreapta, false);  
-    }else if (LED_Semnal_Timer == 1000)
+    }else if (LED_Semnal_Timer == 600)
       LED_Semnal_Timer = -1;
     LED_Semnal_Timer += 1;
   }else{
@@ -231,6 +234,8 @@ void Control_Motor_Top(){
     digitalWrite(PIN_Motor_A_Bottom, false);
     digitalWrite(PIN_Motor_B_Bottom, false);
     digitalWrite(PIN_LED_GoDown, false);
+    Buzzer_Status = false;
+    digitalWrite(PIN_Buzzer, false);
     oMotor_Top = Motor_Top;
   }
 }
@@ -240,11 +245,32 @@ void Control_Motor_Bottom(){
     digitalWrite(PIN_Motor_A_Bottom, Motor_Bottom);
     digitalWrite(PIN_Motor_B_Bottom, Motor_Bottom);
     digitalWrite(PIN_LED_GoDown, Motor_Bottom);
+    Buzzer_Status = Motor_Bottom;
 
     // Set OFF Motor A*
     digitalWrite(PIN_Motor_A_Top, false);
     digitalWrite(PIN_Motor_B_Top, false);
     oMotor_Bottom = Motor_Bottom;
+  }
+}
+
+void Buzzer_Setup(){
+  pinMode(PIN_Buzzer, OUTPUT);
+  DebugMode_Msg("Buzzer_Setup() ...");
+}
+
+void Control_Buzzer(){
+  if (Buzzer_Status == true){
+    if (Buzzer_Timer == 0){
+      digitalWrite(PIN_Buzzer, true);
+    }else if(Buzzer_Timer == 250){
+      digitalWrite(PIN_Buzzer, false);
+    }else if (Buzzer_Timer == 600){
+      Buzzer_Timer = -1;  
+    }
+    Buzzer_Timer += 1;
+  }else{
+    Buzzer_Timer = 0;
   }
 }
 

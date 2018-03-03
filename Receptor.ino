@@ -10,6 +10,7 @@ void setup(){
   LEDs_Setup();
   Motor_Setup();
 
+  Buzzer_Setup();
 }
 
 TimedAction Timed_DebugMode_Serial = TimedAction(1, DebugMode_Serial);
@@ -25,6 +26,8 @@ TimedAction Timed_System_LED_LeftRight = TimedAction(1, System_LED_LeftRight);
 TimedAction Timed_Control_Motor_Top = TimedAction(1, Control_Motor_Top);
 TimedAction Timed_Control_Motor_Bottom = TimedAction(1, Control_Motor_Bottom);
 
+TimedAction Timed_Control_Buzzer = TimedAction(1, Control_Buzzer);
+
 void loop(){
   Timed_DebugMode_Serial.check();
   Timed_Radio_Receiver.check();
@@ -38,5 +41,6 @@ void loop(){
 
   Timed_Control_Motor_Top.check();
   Timed_Control_Motor_Bottom.check();
-  
+
+  Timed_Control_Buzzer.check();
 }
