@@ -222,6 +222,12 @@ void Motor_Setup(){
   pinMode(PIN_Motor_A_Bottom, OUTPUT);
   pinMode(PIN_Motor_B_Top, OUTPUT);
   pinMode(PIN_Motor_B_Bottom, OUTPUT);
+
+  pinMode(PIN_Motor_C_Top, OUTPUT);
+  pinMode(PIN_Motor_C_Bottom, OUTPUT);
+  pinMode(PIN_Motor_D_Top, OUTPUT);
+  pinMode(PIN_Motor_D_Bottom, OUTPUT);
+
   DebugMode_Msg("Motor_Setup() ...");
 }
 
@@ -229,10 +235,14 @@ void Control_Motor_Top(){
   if (oMotor_Top != Motor_Top){
     digitalWrite(PIN_Motor_A_Top, Motor_Top);
     digitalWrite(PIN_Motor_B_Top, Motor_Top);
+    digitalWrite(PIN_Motor_C_Top, Motor_Top);
+    digitalWrite(PIN_Motor_D_Top, Motor_Top);
 
     // Set OFF Motor B*
     digitalWrite(PIN_Motor_A_Bottom, false);
     digitalWrite(PIN_Motor_B_Bottom, false);
+    digitalWrite(PIN_Motor_C_Bottom, false);
+    digitalWrite(PIN_Motor_D_Bottom, false);
     digitalWrite(PIN_LED_GoDown, false);
     Buzzer_Status = false;
     digitalWrite(PIN_Buzzer, false);
@@ -244,12 +254,16 @@ void Control_Motor_Bottom(){
   if (oMotor_Bottom != Motor_Bottom){
     digitalWrite(PIN_Motor_A_Bottom, Motor_Bottom);
     digitalWrite(PIN_Motor_B_Bottom, Motor_Bottom);
+    digitalWrite(PIN_Motor_C_Bottom, Motor_Bottom);
+    digitalWrite(PIN_Motor_D_Bottom, Motor_Bottom);
     digitalWrite(PIN_LED_GoDown, Motor_Bottom);
     Buzzer_Status = Motor_Bottom;
 
     // Set OFF Motor A*
     digitalWrite(PIN_Motor_A_Top, false);
     digitalWrite(PIN_Motor_B_Top, false);
+    digitalWrite(PIN_Motor_C_Top, false);
+    digitalWrite(PIN_Motor_D_Top, false);
     oMotor_Bottom = Motor_Bottom;
   }
 }
