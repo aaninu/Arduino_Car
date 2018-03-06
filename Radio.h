@@ -1,6 +1,12 @@
+////////////////////////////////////////////////////////////////////////////
+// Titlu proiect: Smart Car (Radio control)                               //
+// Autor: Aninu                                                           //
+// Versiune: V 2.0                                                        //
+// URL: https://aninu.xyz/post/smart-car-v1/                              //
+// GitHub: https://github.com/aaninu/Arduino_Car                          //
+////////////////////////////////////////////////////////////////////////////
 
-using namespace std;
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 void DebugMode_Msg(String text);
 void DebugMode_Msg(String text, int valoare);
 void DebugMode_Msg(String text, bool valoare);
@@ -9,11 +15,11 @@ void DebugMode_Msg(String text, String valoare);
 void Radio_Setup();
 void Radio_Receiver();
 void Radio_Parsing(char Value[], int Len);
-
 void Radio_Decode_Variable(String Variabila, bool Value);
 void Radio_DecodeInt_Value(String sVariabila, int iValoare);
-
 //////////////////////////////////////////////////////////////////////
+
+/** Se foloseste pentru a initializa setarile Radio. */
 void Radio_Setup(){
   vw_set_ptt_inverted(true);
   vw_set_rx_pin(PIN_rx);
@@ -22,6 +28,7 @@ void Radio_Setup(){
   DebugMode_Msg("Radio_Setup() ...");
 }
 
+/** Se foloseste pentru a afisa comenzile radio receptionate. */
 void Radio_Receiver(){
   uint8_t buf[VW_MAX_MESSAGE_LEN];
   uint8_t buflen = VW_MAX_MESSAGE_LEN;
@@ -34,6 +41,7 @@ void Radio_Receiver(){
   }
 }
 
+/** Se foloseste pentru a parsa comenzile radio primite. */
 void Radio_Parsing(char Value[], int Len){
   char vType[11];
   for (int i = 0; i < 11; i++){

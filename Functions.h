@@ -1,7 +1,14 @@
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Titlu proiect: Smart Car (Radio control)                               //
+// Autor: Aninu                                                           //
+// Versiune: V 2.0                                                        //
+// URL: https://aninu.xyz/post/smart-car-v1/                              //
+// GitHub: https://github.com/aaninu/Arduino_Car                          //
+////////////////////////////////////////////////////////////////////////////
+
+/** Include librariile necesare. */
 #include "Settings.h"
 #include "Radio.h"
-
 
 //////////////////////////////////////////////////////////////////////
 void DebugMode_Setup();
@@ -11,10 +18,8 @@ void DebugMode_Msg(String text, bool valoare);
 void DebugMode_Msg(String text, char* valoare);
 void DebugMode_Msg(String text, String valoare);
 void DebugMode_Serial();
-
 void Radio_Decode_Variable(String Variabila, bool Value);
 void Radio_DecodeInt_Value(String sVariabila, int iValoare);
-
 void LEDs_Setup();
 void Control_LED_Pozitii();
 void Control_LED_FazaLunga();
@@ -23,16 +28,17 @@ void System_LED_LeftRight();
 void Control_LED_Left();
 void Control_LED_Right();
 void Control_LED_Avarii();
-
 void Motor_Setup();
 void Control_Motor_Top();
 void Control_Motor_Bottom();
 void Control_Motor_Left(bool status);
 void Control_Motor_Right(bool status);
-
+void Control_Motor_Full_OFF();
 void Buzzer_Setup();
 void Control_Buzzer();
 //////////////////////////////////////////////////////////////////////
+
+/** Se foloseste pentru afisarea mesajelor de debug */
 void DebugMode_Setup(){
   if (DebugMode){
     Serial.begin(9600);
@@ -83,11 +89,11 @@ void DebugMode_Msg(String text, String valoare){
   }
 }
 
+/** Init Serial Comunication */
 void DebugMode_Serial(){
   if (Serial.available() > 0){
     DebugSerialValue = Serial.read();
     DebugMode_Msg("Serial.read():", DebugSerialValue);
-
   }
 }
 
@@ -96,31 +102,24 @@ void Radio_Decode_Variable(String Variabila, bool Value){
   if (Variabila.equals(COD_LED_Pozitii)){
     LED_Pozitii = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_LED_Pozitii]", Value);
-    
   }else if (Variabila.equals(COD_LED_FazaLunga)){
     LED_FazaLunga = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_LED_FazaLunga]", Value);
-    
   }else if (Variabila.equals(COD_LED_Left)){
     LED_Left = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_LED_Left]", Value);
-    
   }else if (Variabila.equals(COD_LED_Right)){
     LED_Right = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_LED_Right]", Value);
-    
   }else if (Variabila.equals(COD_LED_Avarii)){
     LED_Avarii = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_LED_Avarii]", Value);
-
   }else if (Variabila.equals(COD_Motor_Top)){
     Motor_Top = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_Motor_Top]", Value);
-    
   }else if (Variabila.equals(COD_Motor_Bottom)){
     Motor_Bottom = Value;
     DebugMode_Msg("Radio_Decode_Variable(...): [COD_Motor_Bottom]", Value);
-    
   }else{
     DebugMode_Msg("Radio_Decode_Variable(...):", Variabila);
     
@@ -219,7 +218,6 @@ void System_LED_LeftRight(){
   }else{
     LED_Semnal_Timer = 0;
   }
-  
 }
 
 /** Control LED Left */
@@ -253,20 +251,20 @@ void Control_LED_Avarii(){
   }
 }
 
+/** Se initializeaza pinii pentru motoare. */
 void Motor_Setup(){
   pinMode(PIN_Motor_A_Top, OUTPUT);
   pinMode(PIN_Motor_A_Bottom, OUTPUT);
   pinMode(PIN_Motor_B_Top, OUTPUT);
   pinMode(PIN_Motor_B_Bottom, OUTPUT);
-
   pinMode(PIN_Motor_C_Top, OUTPUT);
   pinMode(PIN_Motor_C_Bottom, OUTPUT);
   pinMode(PIN_Motor_D_Top, OUTPUT);
   pinMode(PIN_Motor_D_Bottom, OUTPUT);
-
   DebugMode_Msg("Motor_Setup() ...");
 }
 
+/** Se foloseste pentru deplasarea masinii inainte. */
 void Control_Motor_Top(){
   if (oMotor_Top != Motor_Top && !Motor_Left && !Motor_Right){
     digitalWrite(PIN_Motor_A_Top, Motor_Top);
@@ -274,7 +272,7 @@ void Control_Motor_Top(){
     digitalWrite(PIN_Motor_C_Top, Motor_Top);
     digitalWrite(PIN_Motor_D_Top, Motor_Top);
 
-    // Set OFF Motor B*
+    /* Se opresc motoarele pentru deplasarea masinii in spate. */
     digitalWrite(PIN_Motor_A_Bottom, false);
     digitalWrite(PIN_Motor_B_Bottom, false);
     digitalWrite(PIN_Motor_C_Bottom, false);
@@ -286,6 +284,7 @@ void Control_Motor_Top(){
   }
 }
 
+/** Se foloseste pentru deplasarea masinii in spate. */
 void Control_Motor_Bottom(){
   if (oMotor_Bottom != Motor_Bottom && !Motor_Left && !Motor_Right){
     digitalWrite(PIN_Motor_A_Bottom, Motor_Bottom);
@@ -295,7 +294,7 @@ void Control_Motor_Bottom(){
     digitalWrite(PIN_LED_GoDown, Motor_Bottom);
     Buzzer_Status = Motor_Bottom;
 
-    // Set OFF Motor A*
+    /* Se opresc motoarele pentru deplasarea masinii inainte. */
     digitalWrite(PIN_Motor_A_Top, false);
     digitalWrite(PIN_Motor_B_Top, false);
     digitalWrite(PIN_Motor_C_Top, false);
@@ -304,45 +303,33 @@ void Control_Motor_Bottom(){
   }
 }
 
+/** Se foloseste pentru rotirea masinii la stanga */
 void Control_Motor_Left(bool status){
-    if (status == true){
-      digitalWrite(PIN_Motor_A_Bottom, true);
-      digitalWrite(PIN_Motor_C_Bottom, true);
-      digitalWrite(PIN_Motor_B_Top, true);
-      digitalWrite(PIN_Motor_D_Top, true);
-      Serial.println("Enable Left");
-    }else{
-        digitalWrite(PIN_Motor_A_Top, false);
-        digitalWrite(PIN_Motor_B_Top, false);
-        digitalWrite(PIN_Motor_C_Top, false);
-        digitalWrite(PIN_Motor_D_Top, false);
-        digitalWrite(PIN_Motor_A_Bottom, false);
-        digitalWrite(PIN_Motor_B_Bottom, false);
-        digitalWrite(PIN_Motor_C_Bottom, false);
-        digitalWrite(PIN_Motor_D_Bottom, false);
-        Serial.println("Diss Left");
-    }
+  if (status == true){
+    digitalWrite(PIN_Motor_A_Bottom, true);
+    digitalWrite(PIN_Motor_C_Bottom, true);
+    digitalWrite(PIN_Motor_B_Top, true);
+    digitalWrite(PIN_Motor_D_Top, true);
+    DebugMode_Msg("Control_Motor_Right(true): sunt active motoarele pentru rotirea la stanga.");
+  }else{
+    Control_Motor_Full_OFF();
+  }
 }
 
+/** Se foloseste pentru rotirea masinii la dreapta */
 void Control_Motor_Right(bool status){
   if (status == true){
-      digitalWrite(PIN_Motor_B_Bottom, true);
-      digitalWrite(PIN_Motor_D_Bottom, true);
-      digitalWrite(PIN_Motor_A_Top, true);
-      digitalWrite(PIN_Motor_C_Top, true);
-      Serial.println("Enable Right");
-    }else{
-        digitalWrite(PIN_Motor_A_Top, false);
-        digitalWrite(PIN_Motor_B_Top, false);
-        digitalWrite(PIN_Motor_C_Top, false);
-        digitalWrite(PIN_Motor_D_Top, false);
-        digitalWrite(PIN_Motor_A_Bottom, false);
-        digitalWrite(PIN_Motor_B_Bottom, false);
-        digitalWrite(PIN_Motor_C_Bottom, false);
-        digitalWrite(PIN_Motor_D_Bottom, false);
-        Serial.println("Disable Right");
-      }
+    digitalWrite(PIN_Motor_B_Bottom, true);
+    digitalWrite(PIN_Motor_D_Bottom, true);
+    digitalWrite(PIN_Motor_A_Top, true);
+    digitalWrite(PIN_Motor_C_Top, true);
+    DebugMode_Msg("Control_Motor_Right(true): sunt active motoarele pentru rotirea la dreapta.");
+  }else{
+    Control_Motor_Full_OFF();
+  }
 }
+
+/** Se foloseste pentru a opri toate motoarele. */
 void Control_Motor_Full_OFF(){
   digitalWrite(PIN_Motor_A_Top, false);
   digitalWrite(PIN_Motor_B_Top, false);
@@ -352,14 +339,16 @@ void Control_Motor_Full_OFF(){
   digitalWrite(PIN_Motor_B_Bottom, false);
   digitalWrite(PIN_Motor_C_Bottom, false);
   digitalWrite(PIN_Motor_D_Bottom, false);
-  Serial.println("Set off all motors.");
+  DebugMode_Msg("Control_Motor_Full_OFF(): toate motoarele au fost setate ca fiind oprite.");
 }
 
+/** Se initializeaza PIN-ul pentru buzzer */
 void Buzzer_Setup(){
   pinMode(PIN_Buzzer, OUTPUT);
   DebugMode_Msg("Buzzer_Setup() ...");
 }
 
+/** Se foloseste pentru a controla sunetul emis de buzzer */
 void Control_Buzzer(){
   if (Buzzer_Status == true){
     if (Buzzer_Timer == 0){
@@ -393,7 +382,7 @@ void Setup_SensorBottom(){
   DebugMode_Msg("Setup_SensorBottom() ...");
 }
 
-
+/** Se foloseste pentru a opri masina automat daca sunt obstacole la mersul inainte. */
 void Sensor_Top(){
   if (Motor_Top){
     long duration, distance;
@@ -412,6 +401,7 @@ void Sensor_Top(){
       Motor_Left = false;
       Motor_Right = false;
       LED_Stop = true;
+      Buzzer_Status = false;
       Control_Motor_Full_OFF();
     }
     if (DebugMODE_ST){
@@ -421,6 +411,8 @@ void Sensor_Top(){
     }
   }
 }
+
+/** Se foloseste pentru a opri masina automat daca sunt obstacole la mersul in spate. */
 void Sensor_Bottom(){
   if (Motor_Bottom){
     long duration, distance;
@@ -439,6 +431,7 @@ void Sensor_Bottom(){
       Motor_Left = false;
       Motor_Right = false;
       LED_Stop = true;
+      Buzzer_Status = false;
       Control_Motor_Full_OFF();
     }
     if (DebugMODE_SB){

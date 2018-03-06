@@ -1,106 +1,115 @@
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Titlu proiect: Smart Car (Radio control)                               //
+// Autor: Aninu                                                           //
+// Versiune: V 2.0                                                        //
+// URL: https://aninu.xyz/post/smart-car-v1/                              //
+// GitHub: https://github.com/aaninu/Arduino_Car                          //
+////////////////////////////////////////////////////////////////////////////
+//  Note: Pentru anumite variabile se foloseste o valoare curenta si una  //
+// veche pentru a nu se face SPAM de comenzi catre modulele folosite de   //
+// masina. Codul Radio specific este trimis de telecomanda.               //
+////////////////////////////////////////////////////////////////////////////
+
+/** Include librariile necesare. */
 #include "VirtualWire.h"
 #include "TimedAction.h"
 
+/** Variabilele folosite pentru Developer */
+boolean DebugMode = true;         // Activeaza / dezactiveaza mesajele de debug din SERIAL
+bool DebugMODE_ST = false;        // Activeaza / dezactiveaza informatiile despre senzorul din fata al masinii
+bool DebugMODE_SB = false;        // Activeaza / dezactiveaza informatiile despre senzorul din spate al masinii
+int DebugSerialValue = 0;         // Valoarea trimisa prin SERIAL catre masina
 
-// Developer
-boolean DebugMode = true;
-bool DebugMODE_ST = false;
-bool DebugMODE_SB = false;
-int DebugSerialValue = 0;
-
-// Radio
-int Radio_Speed = 4000;
-int PIN_tx = 10;
-int PIN_rx = 12;
+/** Initializarea setarilor pentru radio. */
+int Radio_Speed = 4000;     // Valoarea Speed pentru radio
+int PIN_tx = 10;            // PIN-ul folosit pentru modulul de transmitere
+int PIN_rx = 12;            // PIN-ul folosit pentru modulul de receptie
 int Radio_Test_Value = 0;
 
-// PIin For Leds:
-int PIN_LED_PozitieFata = 7;
-int PIN_LED_FazaLunga = 8;
-int PIN_LED_GoDown = 9;
-int PIN_LED_PozitieSpate = 10;
-int PIN_LED_Stop = 11;
-int PIN_LED_Stanga = 6;
-int PIN_LED_Dreapta = 5;
-//
+/** Reprezinta PINII folositi pentru LED-uri. */
+int PIN_LED_PozitieFata = 7;        // LED pentru pozitie fata
+int PIN_LED_FazaLunga = 8;          // LED pentru faza lunga
+int PIN_LED_GoDown = 9;             // LED pentru mersul cu spatele
+int PIN_LED_PozitieSpate = 10;      // LED pentru pozitie spate
+int PIN_LED_Stop = 11;              // LED pentru stop
+int PIN_LED_Stanga = 6;             // LED pentru semnalizare stanga
+int PIN_LED_Dreapta = 5;            // LED pentru semnalizare dreapta
 
-// Statusuri
-bool LED_Pozitii = false;
-bool oLED_Pozitii = false;
-bool LED_FazaLunga = false;
-bool oLED_FazaLunga = false;
-bool LED_Stop = false;
-bool oLED_Stop = false;
-bool LED_Left = false;
-bool oLED_Left = false;
-bool LED_Right = false;
-bool oLED_Right = false;
-bool LED_Avarii = false;
-bool oLED_Avarii = false;
+/** Se foloseste pentru activarea / oprirea ledurilor */
+/** LED pentru pozitii */
+bool LED_Pozitii = false;             // Valoare curenta
+bool oLED_Pozitii = false;            // Valoare veche
+/** LED pentru faza lunga */
+bool LED_FazaLunga = false;           // Valoare curenta
+bool oLED_FazaLunga = false;          // Valoare veche
+/** LED pentru STOP */
+bool LED_Stop = false;                // Valoare curenta
+bool oLED_Stop = false;               // Valoare veche
+/** LED pentru semnalizare stanga */
+bool LED_Left = false;                // Valoare curenta
+bool oLED_Left = false;               // Valoare veche
+/** LED pentru semnalizare dreapta */
+bool LED_Right = false;               // Valoare curenta
+bool oLED_Right = false;              // Valoare veche
+/** Sistemul de avarii */
+bool LED_Avarii = false;              // Valoare curenta
+bool oLED_Avarii = false;             // Valoare veche
 
+/** Se foloseste pentru timpul alocat semnalizarilor.  */
 int LED_Semnal_Timer = 0;
-//
 
-// Comenzi Radio
-String COD_LED_Pozitii = "Av3_LED_Pos";
-String COD_LED_FazaLunga = "Av3_LED_Faz";
-String COD_LED_Left = "Av3_LED_Lef";
-String COD_LED_Right = "Av3_LED_Rig";
-String COD_LED_Avarii = "Av3_LED_LAR";
-//
+/** Lista de comenzi radio pentru leduri, specifice pentru aceasta versiune de masina. */
+String COD_LED_Pozitii = "Av2_LED_Pos";       // Comanda pentru pozitii
+String COD_LED_FazaLunga = "Av2_LED_Faz";     // Comanda pentru faza lunga
+String COD_LED_Left = "Av2_LED_Lef";          // Comanda pentru semnalizare stanga
+String COD_LED_Right = "Av2_LED_Rig";         // Comanda pentru semnalizare dreapta
+String COD_LED_Avarii = "Av2_LED_LAR";        // Comanda pentru avarii
 
-// PIN Motor 
-int PIN_Motor_A_Top = 53;
-int PIN_Motor_A_Bottom = 51;
-int PIN_Motor_B_Top = 49;
-int PIN_Motor_B_Bottom = 47;
+/** Reprezinta PINII folositi de motoare. */ 
+int PIN_Motor_A_Top = 53;         // Motor Stanga Fata >> Deplasare inainte
+int PIN_Motor_A_Bottom = 51;      // Motor Stanga Fata >> Deplasare inapoi
+int PIN_Motor_B_Top = 49;         // Motor Dreapta Fata >> Deplasare inainte
+int PIN_Motor_B_Bottom = 47;      // Motor Dreapta Fata >> Deplasare inapoi
+int PIN_Motor_C_Top = 52;         // Motor Stanga Spate >> Deplasare inainte
+int PIN_Motor_C_Bottom = 50;      // Motor Stanga Spate >> Deplasare inapoi
+int PIN_Motor_D_Top = 48;         // Motor Dreapta Spate >> Deplasare inainte
+int PIN_Motor_D_Bottom = 46;      // Motor Dreapta Spate >> Deplasare inapoi
 
-int PIN_Motor_C_Top = 52;
-int PIN_Motor_C_Bottom = 50;
-int PIN_Motor_D_Top = 48;
-int PIN_Motor_D_Bottom = 46;
+/** Lista de comenzi radio pentru motoare, specifice pentru aceasta versiune de masina. */
+String COD_Motor_Top = "Av2_MOT_TOP";         // Deplasarea inainte
+String COD_Motor_Bottom = "Av2_MOT_BOT";      // Deplasarea in spate
+String COD_Motor_Left = "Av2_MOT_Lef";        // Rotirea la stanga
+String COD_Motor_Right = "Av2_MOT_Rig";       // Rotirea la dreapta
+String COD_Motor_Servo = "Av2_Ser_Top";       // Valoarea primita de la potentiometru.
 
-//
+/** Se folosesc pentru activarea / oprirea motoarelor in functie de directia dorita. */
+/** Deplasarea inainte. */
+bool Motor_Top = false;             // Valoare curenta 
+bool oMotor_Top = false;            // Valoare veche
+/** Deplasarea in spate.  */
+bool Motor_Bottom = false;          // Valare curenta
+bool oMotor_Bottom = false;         // Valoare veche
+/** Rotirea masinii la stanga. */
+bool Motor_Left = false;            // Valoare curenta
+bool oMotor_Left = false;           // Valoare veche
+/** Rotirea masinii la dreapta. */
+bool Motor_Right = false;           // Valoare curenta
+bool oMotor_Right = false;          // Valoare veche
 
-// Comenzi Radio
-String COD_Motor_Top = "Av3_MOT_TOP";
-String COD_Motor_Bottom = "Av3_MOT_BOT";
-// Comenzi left right 
-String COD_Motor_Left = "Av3_MOT_Lef";
-String COD_Motor_Right = "Av3_MOT_Rig";
-
-String COD_Motor_Servo = "APP_Ser_Top";
-
-// Statusuri
-bool Motor_Top = false;
-bool oMotor_Top = false;
-bool Motor_Bottom = false;
-bool oMotor_Bottom = false;
-// 
-bool Motor_Left = false;
-bool oMotor_Left = false;
-bool Motor_Right = false;
-bool oMotor_Right = false;
-
-
-// PIN Buzzer
+/** Reprezinta PIN-ul unde este conectat buzzer-ul. */
 int PIN_Buzzer = 45;
 
+/** Se foloseste pentru activarea / oprirea buzzer-ului. */
 bool Buzzer_Status = false;
 
+/** Se foloseste pentru timpul buzzer-ului. */
 int Buzzer_Timer = 0;
 
+/** Reprezinta cei 2 PINI folositi pentru senzorul din fata al masinii. */
+int PIN_ST_echo = 26;             // PIN - echo
+int PIN_ST_trig = 27;             // PIN - trig
 
-// Sensor TOP PIN
-int PIN_ST_echo = 26;
-int PIN_ST_trig = 27;
-// END
-
-// Sensor TOP PIN
-int PIN_SB_echo = 28;
-int PIN_SB_trig = 29;
-// END
-
-
+/** Reprezinta cei 2 PINI folositi pentru senzorul din spate al masinii. */
+int PIN_SB_echo = 28;             // PIN - echo
+int PIN_SB_trig = 29;             // PIN - trig
 
