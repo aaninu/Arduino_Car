@@ -11,6 +11,7 @@ void Radio_Receiver();
 void Radio_Parsing(char Value[], int Len);
 
 void Radio_Decode_Variable(String Variabila, bool Value);
+void Radio_DecodeInt_Value(String sVariabila, int iValoare);
 
 //////////////////////////////////////////////////////////////////////
 void Radio_Setup(){
@@ -68,13 +69,12 @@ void Radio_Parsing(char Value[], int Len){
     Radio_Decode_Variable(Variabila, false);
 
   }else{
-    Serial.println("Trebuie sa fie INT");
-
     int iValoare = atoi(Valoare.c_str());
-    Serial.println(iValoare);
-
-    Serial.println("END HH");
+    Radio_DecodeInt_Value(Variabila, iValoare);
+    
+    //Serial.print("Trebuie sa fie INT ");
+    //Serial.print(iValoare);
+    //Serial.println(" END HH");
   }
-  
 }
 

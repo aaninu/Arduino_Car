@@ -13,10 +13,12 @@ void DebugMode_Msg(String text, String valoare);
 void DebugMode_Serial();
 
 void Radio_Decode_Variable(String Variabila, bool Value);
+void Radio_DecodeInt_Value(String sVariabila, int iValoare);
 
 void LEDs_Setup();
 void Control_LED_Pozitii();
 void Control_LED_FazaLunga();
+void Control_LED_Stop();
 void System_LED_LeftRight();
 void Control_LED_Left();
 void Control_LED_Right();
@@ -25,6 +27,8 @@ void Control_LED_Avarii();
 void Motor_Setup();
 void Control_Motor_Top();
 void Control_Motor_Bottom();
+void Control_Motor_Left(bool status);
+void Control_Motor_Right(bool status);
 
 void Buzzer_Setup();
 void Control_Buzzer();
@@ -123,6 +127,29 @@ void Radio_Decode_Variable(String Variabila, bool Value){
   }
 }
 
+/** Decode int value */
+void Radio_DecodeInt_Value(String sVariabila, int iValoare){
+  if (sVariabila == COD_Motor_Servo){
+    if (iValoare < 400){
+      Motor_Right = false;
+      Motor_Left = true;
+      Control_Motor_Left(true);
+    }else if (iValoare > 600){
+      Motor_Left = false;
+      Motor_Right = true;
+      Control_Motor_Right(true);
+    }else{
+      Motor_Left = false;
+      Motor_Right = false;
+      Control_Motor_Left(false);
+      Control_Motor_Right(false);
+    }
+  }else{
+    DebugMode_Msg("Radio_DecodeInt_Value(...):" + sVariabila + ": ", iValoare);
+  }
+}
+
+
 /** Setup PIN Leds */
 void LEDs_Setup(){
   pinMode(PIN_LED_PozitieFata, OUTPUT);  
@@ -149,6 +176,15 @@ void Control_LED_FazaLunga(){
   if (oLED_FazaLunga != LED_FazaLunga){
     digitalWrite(PIN_LED_FazaLunga, LED_FazaLunga);
     oLED_FazaLunga = LED_FazaLunga;
+  }
+}
+
+/** Control LED Stop */
+void Control_LED_Stop(){
+  if (oLED_Stop != LED_Stop){
+    digitalWrite(PIN_LED_Stop, LED_Stop);
+    digitalWrite(PIN_LED_Stop, LED_Stop);
+    oLED_Stop = LED_Stop;
   }
 }
 
@@ -232,7 +268,7 @@ void Motor_Setup(){
 }
 
 void Control_Motor_Top(){
-  if (oMotor_Top != Motor_Top){
+  if (oMotor_Top != Motor_Top && !Motor_Left && !Motor_Right){
     digitalWrite(PIN_Motor_A_Top, Motor_Top);
     digitalWrite(PIN_Motor_B_Top, Motor_Top);
     digitalWrite(PIN_Motor_C_Top, Motor_Top);
@@ -251,7 +287,7 @@ void Control_Motor_Top(){
 }
 
 void Control_Motor_Bottom(){
-  if (oMotor_Bottom != Motor_Bottom){
+  if (oMotor_Bottom != Motor_Bottom && !Motor_Left && !Motor_Right){
     digitalWrite(PIN_Motor_A_Bottom, Motor_Bottom);
     digitalWrite(PIN_Motor_B_Bottom, Motor_Bottom);
     digitalWrite(PIN_Motor_C_Bottom, Motor_Bottom);
@@ -266,6 +302,57 @@ void Control_Motor_Bottom(){
     digitalWrite(PIN_Motor_D_Top, false);
     oMotor_Bottom = Motor_Bottom;
   }
+}
+
+void Control_Motor_Left(bool status){
+    if (status == true){
+      digitalWrite(PIN_Motor_A_Bottom, true);
+      digitalWrite(PIN_Motor_C_Bottom, true);
+      digitalWrite(PIN_Motor_B_Top, true);
+      digitalWrite(PIN_Motor_D_Top, true);
+      Serial.println("Enable Left");
+    }else{
+        digitalWrite(PIN_Motor_A_Top, false);
+        digitalWrite(PIN_Motor_B_Top, false);
+        digitalWrite(PIN_Motor_C_Top, false);
+        digitalWrite(PIN_Motor_D_Top, false);
+        digitalWrite(PIN_Motor_A_Bottom, false);
+        digitalWrite(PIN_Motor_B_Bottom, false);
+        digitalWrite(PIN_Motor_C_Bottom, false);
+        digitalWrite(PIN_Motor_D_Bottom, false);
+        Serial.println("Diss Left");
+    }
+}
+
+void Control_Motor_Right(bool status){
+  if (status == true){
+      digitalWrite(PIN_Motor_B_Bottom, true);
+      digitalWrite(PIN_Motor_D_Bottom, true);
+      digitalWrite(PIN_Motor_A_Top, true);
+      digitalWrite(PIN_Motor_C_Top, true);
+      Serial.println("Enable Right");
+    }else{
+        digitalWrite(PIN_Motor_A_Top, false);
+        digitalWrite(PIN_Motor_B_Top, false);
+        digitalWrite(PIN_Motor_C_Top, false);
+        digitalWrite(PIN_Motor_D_Top, false);
+        digitalWrite(PIN_Motor_A_Bottom, false);
+        digitalWrite(PIN_Motor_B_Bottom, false);
+        digitalWrite(PIN_Motor_C_Bottom, false);
+        digitalWrite(PIN_Motor_D_Bottom, false);
+        Serial.println("Disable Right");
+      }
+}
+void Control_Motor_Full_OFF(){
+  digitalWrite(PIN_Motor_A_Top, false);
+  digitalWrite(PIN_Motor_B_Top, false);
+  digitalWrite(PIN_Motor_C_Top, false);
+  digitalWrite(PIN_Motor_D_Top, false);
+  digitalWrite(PIN_Motor_A_Bottom, false);
+  digitalWrite(PIN_Motor_B_Bottom, false);
+  digitalWrite(PIN_Motor_C_Bottom, false);
+  digitalWrite(PIN_Motor_D_Bottom, false);
+  Serial.println("Set off all motors.");
 }
 
 void Buzzer_Setup(){
@@ -285,6 +372,81 @@ void Control_Buzzer(){
     Buzzer_Timer += 1;
   }else{
     Buzzer_Timer = 0;
+    digitalWrite(PIN_Buzzer, false);
   }
 }
+
+
+// Init Sensor Top PIN
+void Setup_SensorTop(){
+  // Init Sensor
+  pinMode(PIN_ST_echo, INPUT);
+  pinMode(PIN_ST_trig, OUTPUT);
+  DebugMode_Msg("Setup_SensorTop() ...");
+}
+
+// Init Sensor Bottom PIN
+void Setup_SensorBottom(){
+  // Init Sensor
+  pinMode(PIN_SB_echo, INPUT);
+  pinMode(PIN_SB_trig, OUTPUT);
+  DebugMode_Msg("Setup_SensorBottom() ...");
+}
+
+
+void Sensor_Top(){
+  if (Motor_Top){
+    long duration, distance;
+    digitalWrite(PIN_ST_trig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(PIN_ST_trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(PIN_ST_trig, LOW);
+    duration = pulseIn(PIN_ST_echo, HIGH);
+    distance = (duration/2) / 29.1;
+    // Check condition for stop car 
+    if (distance <= 20){
+      Serial.println("[DebugMODE]: Sensor_Top(): failsafe [<20].");
+      Motor_Top = false;
+      Motor_Bottom = false;
+      Motor_Left = false;
+      Motor_Right = false;
+      LED_Stop = true;
+      Control_Motor_Full_OFF();
+    }
+    if (DebugMODE_ST){
+      Serial.print("[DebugMODE.ST]: ");
+      Serial.print(distance);
+      Serial.println(" cm");
+    }
+  }
+}
+void Sensor_Bottom(){
+  if (Motor_Bottom){
+    long duration, distance;
+    digitalWrite(PIN_SB_trig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(PIN_SB_trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(PIN_SB_trig, LOW);
+    duration = pulseIn(PIN_SB_echo, HIGH);
+    distance = (duration/2) / 29.1;
+    // Check condition for stop car 
+    if (distance <= 20){
+      Serial.println("[DebugMODE]: Sensor_Bottom(): failsafe [<20].");
+      Motor_Top = false;
+      Motor_Bottom = false;
+      Motor_Left = false;
+      Motor_Right = false;
+      LED_Stop = true;
+      Control_Motor_Full_OFF();
+    }
+    if (DebugMODE_SB){
+      Serial.print("[DebugMODE.SB]: ");
+      Serial.print(distance);
+      Serial.println(" cm");
+    }
+  }
+}
+
 
