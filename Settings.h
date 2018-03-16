@@ -113,3 +113,7 @@ int PIN_ST_trig = 27;             // PIN - trig
 int PIN_SB_echo = 28;             // PIN - echo
 int PIN_SB_trig = 29;             // PIN - trig
 
+
+/** Activeaza / Dezactiveaza Senzorii */
+bool Sensor_TOP_Status = false;           // Status Senzor Fata
+bool Sensor_BOTTOM_Status = false;        // Status Senzor Spate
