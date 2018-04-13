@@ -22,8 +22,7 @@ int DebugSerialValue = 0;         // Valoarea trimisa prin SERIAL catre masina
 
 /** Initializarea setarilor pentru radio. */
 int Radio_Speed = 4000;     // Valoarea Speed pentru radio
-int PIN_tx = 10;            // PIN-ul folosit pentru modulul de transmitere
-int PIN_rx = 12;            // PIN-ul folosit pentru modulul de receptie
+int PIN_rx = 4;             // PIN-ul folosit pentru modulul de receptie
 int Radio_Test_Value = 0;
 
 /** Reprezinta PINII folositi pentru LED-uri. */
@@ -106,14 +105,10 @@ bool Buzzer_Status = false;
 int Buzzer_Timer = 0;
 
 /** Reprezinta cei 2 PINI folositi pentru senzorul din fata al masinii. */
-int PIN_ST_echo = 26;             // PIN - echo
-int PIN_ST_trig = 27;             // PIN - trig
+int PIN_ST_echo = 22;             // PIN - echo
+int PIN_ST_trig = 23;             // PIN - trig
 
 /** Reprezinta cei 2 PINI folositi pentru senzorul din spate al masinii. */
-int PIN_SB_echo = 28;             // PIN - echo
-int PIN_SB_trig = 29;             // PIN - trig
+int PIN_SB_echo = 24;             // PIN - echo
+int PIN_SB_trig = 25;             // PIN - trig
 
-
-/** Activeaza / Dezactiveaza Senzorii */
-bool Sensor_TOP_Status = false;           // Status Senzor Fata
-bool Sensor_BOTTOM_Status = false;        // Status Senzor Spate

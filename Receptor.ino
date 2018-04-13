@@ -29,6 +29,9 @@ void setup(){
 
   // Init Radio PIN Setup
   Radio_Setup();
+
+  // Init First Boot
+  Control_FirstBoot();
 }
 
 /** Pregatirea functiilor care trebuie executate in acelasi timp. */
